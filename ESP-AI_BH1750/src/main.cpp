@@ -1,6 +1,6 @@
 #include <Wire.h>
 #include <BH1750.h>
-#include <ocean5644-project-1_inferencing.h>  // Thư viện AI bạn đã thêm
+#include <ocean5644-project-1_inferencing.h> 
 
 #define I2C_SDA_PIN 32
 #define I2C_SCL_PIN 26
@@ -9,7 +9,7 @@ BH1750 lightMeter;
 #define BH1750_FREQ_HZ 10  // 10 lần mỗi giây = 100 ms
 unsigned long lastBH1750_ms = 0;
 
-// Buffer AI: số phần tử phải khớp với Edge Impulse model
+
 float ei_buffer[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE];
 size_t buffer_index = 0;
 
@@ -40,9 +40,7 @@ void loop() {
       Serial.println("Lỗi đọc BH1750.");
     }
 
-    // Khi buffer đầy thì chạy phân loại AI
     if (buffer_index >= EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE) {
-      // Tạo signal từ buffer
       signal_t signal;
       int err = numpy::signal_from_buffer(ei_buffer, EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE, &signal);
       if (err != 0) {
@@ -51,7 +49,6 @@ void loop() {
         return;
       }
 
-      // Chạy mô hình
       ei_impulse_result_t result;
       EI_IMPULSE_ERROR res = run_classifier(&signal, &result, false);
       if (res != EI_IMPULSE_OK) {
@@ -60,7 +57,6 @@ void loop() {
         return;
       }
 
-      // In kết quả
       Serial.println("Kết quả phân loại:");
       for (size_t i = 0; i < EI_CLASSIFIER_LABEL_COUNT; i++) {
         Serial.printf("  %s: %.2f\n",
@@ -69,7 +65,6 @@ void loop() {
       }
       Serial.println("-------------------");
 
-      // Reset để thu thập window mới
       buffer_index = 0;
     }
   }
